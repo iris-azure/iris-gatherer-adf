@@ -1,9 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IrisGathererADF.Jobs;
 using IrisGathererADF.Gatherers;
+using IrisGathererADF.Models.Config;
+using IrisGathererADF.Serializers;
 
 namespace IrisGathererADF
 {
@@ -24,8 +27,27 @@ namespace IrisGathererADF
           })
           .ConfigureServices((hostContext, services) =>
           {
+            IConfiguration config = hostContext.Configuration;
+
+            AzureCreds creds = new AzureCreds();
+            JobParams jobParams = new JobParams();
+
+            config.GetSection("AzureCreds").Bind(creds);
+            config.GetSection("JobParams").Bind(jobParams);
+            
+            services.AddSingleton(creds);
+            services.AddSingleton(jobParams);
             services.AddTransient<IGatherer, ADFGatherer>();
             services.AddHostedService<GathererJob>();
+
+            switch(config.GetValue<string>("Serializer"))
+            {
+              case "cosmos":
+                services.AddTransient<ISerializer, CosmosDbSerializer>();
+                break;
+              default:
+                throw new ArgumentException("Invalid serializer specified.", "Serializer");
+            }
           });
   }
 }

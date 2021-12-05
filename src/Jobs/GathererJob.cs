@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using IrisGathererADF.Gatherers;
+using IrisGathererADF.Models.Config;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -14,27 +15,31 @@ namespace IrisGathererADF.Jobs
     private readonly ILogger<GathererJob> _logger;
     private readonly IGatherer _gatherer;
     private Timer? _timer;
+    private JobParams _jobParams;
 
-    public GathererJob(ILogger<GathererJob> logger, IGatherer gatherer)
+    public GathererJob(ILogger<GathererJob> logger, IGatherer gatherer, JobParams jobParams)
     {
       _logger = logger;
       _gatherer = gatherer;
+      _jobParams = jobParams;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-      _logger.LogInformation("Inside StartAsync.");
+      _logger.LogInformation("Bootstrapping the job...");
       _timer = new Timer(DoWork,
                          null,
                          TimeSpan.Zero,
-                         TimeSpan.FromSeconds(5));
+                         TimeSpan.FromSeconds(_jobParams.TriggerPeriodSeconds));
+      _logger.LogInformation("Job bootstrap complete.");
       return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-      _logger.LogInformation("Inside StopAsync.");
+      _logger.LogInformation("Stopping the job...");
       _timer?.Change(Timeout.Infinite, 0);
+      _logger.LogInformation("Job stopped.");
       return Task.CompletedTask;
     }
 
@@ -45,8 +50,9 @@ namespace IrisGathererADF.Jobs
 
     public void Dispose()
     {
-      _logger.LogInformation("Inside Dispose.");
+      _logger.LogInformation("Job cleanup started...");
       _timer?.Dispose();
+      _logger.LogInformation("Job cleanup complete.");
     }
   }
 }
