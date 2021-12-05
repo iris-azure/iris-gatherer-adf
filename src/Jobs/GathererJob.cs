@@ -16,6 +16,7 @@ namespace IrisGathererADF.Jobs
     private readonly IGatherer _gatherer;
     private Timer? _timer;
     private JobParams _jobParams;
+    private PipelineList? _list;
 
     public GathererJob(ILogger<GathererJob> logger, IGatherer gatherer, JobParams jobParams)
     {
@@ -27,8 +28,13 @@ namespace IrisGathererADF.Jobs
     public Task StartAsync(CancellationToken cancellationToken)
     {
       _logger.LogInformation("Bootstrapping the job...");
+
+      _logger.LogInformation("Initializing factory list...");
+      _list = PipelineList.Initialize(_jobParams, cancellationToken).Result;
+
+      _logger.LogInformation("Setting timer...");
       _timer = new Timer(DoWork,
-                         null,
+                         _list,
                          TimeSpan.Zero,
                          TimeSpan.FromSeconds(_jobParams.TriggerPeriodSeconds));
       _logger.LogInformation("Job bootstrap complete.");
@@ -46,6 +52,17 @@ namespace IrisGathererADF.Jobs
     private void DoWork(object? state)
     {
       _logger.LogInformation("Inside DoWork");
+
+      if (state == null)
+      {
+        _logger.LogError("Error: Factory list not received!");
+      }
+      else
+      {
+        PipelineList list = (PipelineList) state;
+
+        _logger.LogInformation(list.FactoryList[0].ResourceGroup);
+      }
     }
 
     public void Dispose()

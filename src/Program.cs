@@ -34,7 +34,7 @@ namespace IrisGathererADF
 
             config.GetSection("AzureCreds").Bind(creds);
             config.GetSection("JobParams").Bind(jobParams);
-            
+
             services.AddSingleton(creds);
             services.AddSingleton(jobParams);
             services.AddTransient<IGatherer, ADFGatherer>();
