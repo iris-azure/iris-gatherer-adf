@@ -1,60 +1,32 @@
-﻿using System.IO;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
+using IrisGathererADF.Jobs;
+using IrisGathererADF.Gatherers;
 
 namespace IrisGathererADF
 {
   class Program
   {
-    public static ServiceProvider serviceProvider;
-
-    static int Main(string[] args)
+    public static async Task Main(string[] args)
     {
-      var services = ConfigureServices();
-      serviceProvider = services.BuildServiceProvider();
-
-      // var cts = new CancellationTokenSource();
-      // var token = cts.Token;
-      // var serviceBus = serviceProvider.GetService<IServiceBusWorker>();
-
-      // AppDomain.CurrentDomain.ProcessExit += (s, e) => { cts.Cancel(); };
-      // serviceBus.ReceiveMessages();
-      // Thread.Sleep(Timeout.Infinite);
-      return 0;
+      using var host = CreateHostBuilder(args).Build();
+      await host.StartAsync();
+      await host.WaitForShutdownAsync();
     }
 
-    private static IServiceCollection ConfigureServices()
-    {
-      IServiceCollection services = new ServiceCollection();
-
-      // Set up the objects we need to get to configuration settings
-      var config = LoadConfiguration();
-
-      // Add Logging
-      services.AddLogging(logging =>
-      {
-        logging.AddConfiguration(config.GetSection("Logging"));
-        logging.AddSystemdConsole(options =>
-                {
-                  options.IncludeScopes = true;
-                });
-      });
-      // Add the config to our DI container for later user
-      services.AddSingleton(config);
-
-      // Register interfaces with implementation
-
-      return services;
-    }
-
-    private static IConfiguration LoadConfiguration()
-    {
-      var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-          .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-          .AddEnvironmentVariables(prefix: Consts.EnvVarPrefix);
-      return builder.Build();
-    }
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+      Host.CreateDefaultBuilder(args)
+          .ConfigureHostConfiguration((config) =>
+          {
+            config.AddEnvironmentVariables(prefix: "IRISAZ_GATHERER_");
+          })
+          .ConfigureServices((hostContext, services) =>
+          {
+            services.AddTransient<IGatherer, ADFGatherer>();
+            services.AddHostedService<GathererJob>();
+          });
   }
 }
 
