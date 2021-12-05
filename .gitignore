@@ -456,3 +456,6 @@ $RECYCLE.BIN/
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 **/.history
+
+# Factory List JSON
+factorylist.json
