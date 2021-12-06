@@ -17,6 +17,13 @@ namespace IrisGathererADF.Jobs
     private Timer? _timer;
     private JobParams _jobParams;
     private PipelineList? _list;
+    private static Task? _executingTask;
+    private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
+
+    static GathererJob()
+    {
+      _executingTask = null;
+    }
 
     public GathererJob(ILogger<GathererJob> logger, IGatherer gatherer, JobParams jobParams)
     {
@@ -34,34 +41,52 @@ namespace IrisGathererADF.Jobs
 
       _logger.LogInformation("Setting timer...");
       _timer = new Timer(DoWork,
-                         _list,
+                         null,
                          TimeSpan.Zero,
                          TimeSpan.FromSeconds(_jobParams.TriggerPeriodSeconds));
       _logger.LogInformation("Job bootstrap complete.");
       return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
       _logger.LogInformation("Stopping the job...");
+
       _timer?.Change(Timeout.Infinite, 0);
+
+      if (_executingTask != null)
+      {
+        try
+        {
+          _stoppingCts.Cancel();
+        }
+        finally
+        {
+          await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
+        }
+      }
+
       _logger.LogInformation("Job stopped.");
-      return Task.CompletedTask;
+
+      return;
     }
 
     private void DoWork(object? state)
     {
-      _logger.LogInformation("Inside DoWork");
+      _logger.LogInformation("DoWork triggered...");
 
-      if (state == null)
+      if (_executingTask == null || 
+          _executingTask.Status == TaskStatus.RanToCompletion ||
+          _executingTask.Status == TaskStatus.Faulted)
       {
-        _logger.LogError("Error: Factory list not received!");
+        _executingTask = new Task(() => _gatherer.Gather(_list, _stoppingCts.Token));
+        _executingTask.Start();
+
+        _logger.LogInformation("DoWork: Gatherer started.");
       }
       else
       {
-        PipelineList list = (PipelineList) state;
-
-        _logger.LogInformation(list.FactoryList[0].ResourceGroup);
+        _logger.LogWarning("A task is already running, hence skipping. Consider increasing the interval.");
       }
     }
 
