@@ -7,6 +7,7 @@ using IrisGathererADF.Jobs;
 using IrisGathererADF.Gatherers;
 using IrisGathererADF.Models.Config;
 using IrisGathererADF.Serializers;
+using Azure.Identity;
 
 namespace IrisGathererADF
 {
@@ -48,6 +49,21 @@ namespace IrisGathererADF
               default:
                 throw new ArgumentException("Invalid serializer specified.", "Serializer");
             }
+
+            DefaultAzureCredentialOptions credOpts = new DefaultAzureCredentialOptions
+            {
+              ExcludeAzureCliCredential = false,
+              ExcludeAzurePowerShellCredential = true,
+              ExcludeEnvironmentCredential = false,
+              ExcludeInteractiveBrowserCredential = true,
+              ExcludeManagedIdentityCredential = true,
+              ExcludeSharedTokenCacheCredential = true,
+              ExcludeVisualStudioCodeCredential = true,
+              ExcludeVisualStudioCredential = true
+            };
+
+            DefaultAzureCredential defCred = new DefaultAzureCredential(credOpts);
+            services.AddSingleton(creds);
           });
   }
 }
