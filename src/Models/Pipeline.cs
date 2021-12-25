@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace IrisGathererADF.Models
@@ -16,12 +17,16 @@ namespace IrisGathererADF.Models
     [JsonPropertyName(name: "folder")]
     public string Folder { get; set; }
 
+    [JsonPropertyName(name: "runStatuses")]
+    public List<RunStatus> RunStatuses { get; set; }
+
     public Pipeline()
     {
       Id = string.Empty;
       Name = string.Empty;
       Description = string.Empty;
       Folder = string.Empty;
+      RunStatuses = new List<RunStatus>();
     }
   }
 }

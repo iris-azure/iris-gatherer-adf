@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace IrisGathererADF.Models
@@ -19,6 +20,9 @@ namespace IrisGathererADF.Models
     [JsonPropertyName(name: "ver")]
     public string Version { get; set; }
 
+    [JsonPropertyName(name: "pipelines")]
+    public List<Pipeline> Pipelines { get; set; }
+
     public DataFactory()
     {
       Id = string.Empty;
@@ -26,6 +30,7 @@ namespace IrisGathererADF.Models
       Location = string.Empty;
       ResourceGroup = string.Empty;
       Version = string.Empty;
+      Pipelines = new List<Pipeline>();
     }
   }
 }

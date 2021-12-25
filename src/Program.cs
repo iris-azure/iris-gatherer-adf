@@ -63,7 +63,7 @@ namespace IrisGathererADF
             };
 
             DefaultAzureCredential defCred = new DefaultAzureCredential(credOpts);
-            services.AddSingleton(creds);
+            services.AddSingleton(defCred);
           });
   }
 }
