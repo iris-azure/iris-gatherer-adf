@@ -18,19 +18,16 @@ namespace IrisGathererADF.Gatherers
     private readonly ILogger<ADFGatherer> _logger;
     private readonly ISerializer _serializer;
     private readonly DefaultAzureCredential _defCreds;
-    private readonly AzureCreds _creds;
 
     private readonly JobParams _jobParams;
 
     public ADFGatherer(ILogger<ADFGatherer> logger,
                        ISerializer serializer,
-                       AzureCreds creds,
                        DefaultAzureCredential defCreds,
                        JobParams jobParams)
     {
       _logger = logger;
       _defCreds = defCreds;
-      _creds = creds;
       _serializer = serializer;
       _jobParams = jobParams;
     }

@@ -7,10 +7,6 @@
       "DisableColors": true
     }
   },
-  "AzureCreds": {
-    "AppId": "<Put your AppId here>",
-    "Secret": "<Put your secret here>"
-  },
   "Serializer": {
     "Type": "cosmos",
     "ConnectionString": "<Put the connection string for Cosmos DB>",
