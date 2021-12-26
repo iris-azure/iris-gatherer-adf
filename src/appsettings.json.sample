@@ -1,0 +1,26 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
+    },
+    "Console": {
+      "DisableColors": true
+    }
+  },
+  "AzureCreds": {
+    "AppId": "<Put your AppId here>",
+    "Secret": "<Put your secret here>"
+  },
+  "Serializer": {
+    "Type": "cosmos",
+    "ConnectionString": "<Put the connection string for Cosmos DB>",
+    "DatabaseName": "IrisAzure", //Change the DB Name if required
+    "Container": "adf"           //Change container name if required
+  },
+  "JobParams": {
+    "TriggerPeriodSeconds": 600, //Change time period as required
+    "ListLocation": "storage",
+    "ListStorageURL": "<Put SAS Token for the pipeline list to monitor>",
+    "DaysToKeep": 10             //No. of days record to keep
+  }
+}
