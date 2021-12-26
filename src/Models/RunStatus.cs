@@ -46,6 +46,7 @@ namespace IrisGathererADF.Models
       RunEnd = null;
       DurationInMs = null;
       PipelineName = string.Empty;
+      InvokedById = string.Empty;
       InvokedByType = string.Empty;
       InvokedByName = string.Empty;
       InvokedByType = string.Empty;
