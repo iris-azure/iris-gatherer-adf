@@ -6,6 +6,7 @@ namespace IrisGathererADF.Serializers
 {
   public interface ISerializer
   {
+    Task InitializeAsync(CancellationToken cancellationToken);
     Task SerializeAsync(DataFactory dataFactory, CancellationToken cancellationToken);
   }
 }

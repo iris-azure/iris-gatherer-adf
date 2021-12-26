@@ -73,20 +73,28 @@ namespace IrisGathererADF.Jobs
 
     private void DoWork(object? state)
     {
-      _logger.LogInformation("DoWork triggered...");
-
-      if (_executingTask == null || 
-          _executingTask.Status == TaskStatus.RanToCompletion ||
-          _executingTask.Status == TaskStatus.Faulted)
+      try
       {
-        _executingTask = new Task(() => _gatherer.Gather(_list, _stoppingCts.Token));
-        _executingTask.Start();
+        _logger.LogInformation("DoWork triggered...");
 
-        _logger.LogInformation("DoWork: Gatherer started.");
+        if (_executingTask == null || 
+            _executingTask.Status == TaskStatus.RanToCompletion ||
+            _executingTask.Status == TaskStatus.Faulted)
+        {
+          _executingTask = new Task(() => _gatherer.Gather(_list, _stoppingCts.Token));
+          _executingTask.Start();
+
+          _logger.LogInformation("DoWork: Gatherer started.");
+        }
+        else
+        {
+          _logger.LogWarning("A task is already running, hence skipping. Consider increasing the interval.");
+        }
       }
-      else
+      catch (Exception ex)
       {
-        _logger.LogWarning("A task is already running, hence skipping. Consider increasing the interval.");
+        _logger.LogError(ex, "Error Occured. Look at exception details.");
+        throw;
       }
     }
 

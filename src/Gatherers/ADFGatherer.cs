@@ -20,32 +20,47 @@ namespace IrisGathererADF.Gatherers
     private readonly DefaultAzureCredential _defCreds;
     private readonly AzureCreds _creds;
 
+    private readonly JobParams _jobParams;
+
     public ADFGatherer(ILogger<ADFGatherer> logger,
                        ISerializer serializer,
                        AzureCreds creds,
-                       DefaultAzureCredential defCreds)
+                       DefaultAzureCredential defCreds,
+                       JobParams jobParams)
     {
       _logger = logger;
       _defCreds = defCreds;
       _creds = creds;
       _serializer = serializer;
+      _jobParams = jobParams;
     }
 
     public async Task Gather(PipelineList pipelineList,
                              CancellationToken cancellationToken)
     {
-      _logger.LogInformation("Gather: Starting to gather");
-      foreach(PipelineInfo pipelineInfo in pipelineList.FactoryList)
+      try
       {
-        if (cancellationToken.IsCancellationRequested)
+        _logger.LogInformation("Gather: Initializing Serializer");
+        await _serializer.InitializeAsync(cancellationToken);
+        
+        _logger.LogInformation("Gather: Starting to gather");
+        foreach(PipelineInfo pipelineInfo in pipelineList.FactoryList)
         {
-          _logger.LogInformation("Gather: Cancellation requested. Hence exiting.");
-          break;
-        }
+          if (cancellationToken.IsCancellationRequested)
+          {
+            _logger.LogInformation("Gather: Cancellation requested. Hence exiting.");
+            break;
+          }
 
-        await GatherForAFactory(pipelineInfo, cancellationToken);
+          await GatherForAFactory(pipelineInfo, cancellationToken);
+        }
+        _logger.LogInformation("Gather: Gather complete");        
       }
-      _logger.LogInformation("Gather: Gather complete");
+      catch (System.Exception ex)
+      {
+        _logger.LogError(ex, "Error Occured. Look at exception details.");
+        throw;
+      }
     }
 
     private async Task GatherForAFactory(PipelineInfo pipelineInfo,
@@ -59,7 +74,7 @@ namespace IrisGathererADF.Gatherers
       ServiceClientCredentials cred = new TokenCredentials(token);
       DataFactoryManagementClient client = new DataFactoryManagementClient(cred)
       {
-        SubscriptionId = _creds.SubscriptionId
+        SubscriptionId = pipelineInfo.SubscriptionId
       };
       
       _logger.LogInformation($"GatherForAFactory: Gathering Data factory details for {pipelineInfo.Name} in {pipelineInfo.ResourceGroup}");
@@ -68,11 +83,12 @@ namespace IrisGathererADF.Gatherers
                                                         null,
                                                         cancellationToken);
       DataFactory adf = new DataFactory();
-      adf.Id = factory.Id;
+      adf.Id = factory.Id.Replace("/", "|");
       adf.Name = factory.Name;
       adf.Location = factory.Location;
       adf.ResourceGroup = pipelineInfo.ResourceGroup;
       adf.Version = factory.Version;
+      adf.Environment = pipelineInfo.Environment;
 
       Pipeline pipeline;
       RunStatus pipelineStatus;
@@ -85,7 +101,7 @@ namespace IrisGathererADF.Gatherers
       {
         _logger.LogInformation($"GatherForAFactory:     Adding details for {pipeline_i.Name}");
         pipeline = new Pipeline();
-        pipeline.Id = pipeline_i.Id;
+        pipeline.Id = pipeline_i.Id.Replace("/", "|");
         pipeline.Name = pipeline_i.Name;
         pipeline.Folder = (pipeline_i.Folder == null ? string.Empty : pipeline_i.Folder.Name);
         pipeline.Description = pipeline_i.Description;
@@ -94,7 +110,7 @@ namespace IrisGathererADF.Gatherers
                                     pipelineInfo.ResourceGroup, 
                                     pipelineInfo.Name, 
                                     new RunFilterParameters(
-                                      DateTime.UtcNow.AddHours(-24),
+                                      DateTime.UtcNow.AddHours(-24 * _jobParams.DaysToKeep),
                                       DateTime.UtcNow,
                                       null,
                                       new List<RunQueryFilter> 

@@ -10,10 +10,18 @@ namespace IrisGathererADF.Models.Config
     [JsonPropertyName(name: "rg")]
     public string ResourceGroup { get; set; }
 
+    [JsonPropertyName(name: "subscriptionId")]
+    public string SubscriptionId { get; set; }
+
+    [JsonPropertyName(name: "env")]
+    public string Environment { get; set; }
+
     public PipelineInfo()
     {
       Name = string.Empty;
       ResourceGroup = string.Empty;
+      SubscriptionId = string.Empty;
+      Environment = string.Empty;
     }
 
   }

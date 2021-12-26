@@ -32,16 +32,19 @@ namespace IrisGathererADF
 
             AzureCreds creds = new AzureCreds();
             JobParams jobParams = new JobParams();
+            Serializer serializer = new Serializer();
 
             config.GetSection("AzureCreds").Bind(creds);
             config.GetSection("JobParams").Bind(jobParams);
+            config.GetSection("Serializer").Bind(serializer);
 
             services.AddSingleton(creds);
             services.AddSingleton(jobParams);
+            services.AddSingleton(serializer);
             services.AddTransient<IGatherer, ADFGatherer>();
             services.AddHostedService<GathererJob>();
 
-            switch(config.GetValue<string>("Serializer"))
+            switch(serializer.Type)
             {
               case "cosmos":
                 services.AddTransient<ISerializer, CosmosDbSerializer>();

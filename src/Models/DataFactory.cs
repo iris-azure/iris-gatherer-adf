@@ -8,6 +8,9 @@ namespace IrisGathererADF.Models
     [JsonPropertyName(name: "id")]
     public string Id { get; set; }
 
+    [JsonPropertyName(name: "env")]
+    public string Environment { get; set; }
+    
     [JsonPropertyName(name: "name")]
     public string Name { get; set; }
 
@@ -26,6 +29,7 @@ namespace IrisGathererADF.Models
     public DataFactory()
     {
       Id = string.Empty;
+      Environment = string.Empty;
       Name = string.Empty;
       Location = string.Empty;
       ResourceGroup = string.Empty;

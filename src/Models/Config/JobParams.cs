@@ -22,11 +22,14 @@ namespace IrisGathererADF.Models.Config
     public string ListLocation { get; set; }
     public string ListStorageURL { get; set; }
 
+    public int DaysToKeep { get; set; }
+
     public JobParams()
     {
       TriggerPeriodSeconds = 600;
       ListLocation = string.Empty;
       ListStorageURL = string.Empty;
+      DaysToKeep = 10;
     }
   }
 }
