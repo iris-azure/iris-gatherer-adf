@@ -459,3 +459,6 @@ $RECYCLE.BIN/
 
 # Factory List JSON
 factorylist.json
+
+# appsettings
+appsettings.json
