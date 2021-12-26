@@ -26,8 +26,13 @@ jobs:
     - name: Build
       run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
     - name: Test
-      run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-    - name: Codecov
+      run: dotnet test --no-build --logger:"junit;LogFilePath=test-result.xml" --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      if: always()
+      with:
+        files: tests/test-result.xml
+    - name: Publish Codecov
       uses: codecov/codecov-action@v2
 
   analyze:
