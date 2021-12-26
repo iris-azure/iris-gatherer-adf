@@ -5,6 +5,7 @@ namespace IrisGathererADF.Models.Config
   public class JobParams
   {
     private long _triggerPeriodSeconds;
+
     public long TriggerPeriodSeconds 
     { 
       get { return _triggerPeriodSeconds; } 
@@ -19,7 +20,9 @@ namespace IrisGathererADF.Models.Config
         _triggerPeriodSeconds = value;
       } 
     }
+
     public string ListLocation { get; set; }
+
     public string ListStorageURL { get; set; }
 
     public int DaysToKeep { get; set; }

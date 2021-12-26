@@ -1,5 +1,4 @@
 
-
 namespace IrisGathererADF.Models.Config
 {
   public class Serializer
