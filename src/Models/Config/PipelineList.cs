@@ -11,7 +11,7 @@ namespace IrisGathererADF.Models.Config
 {
   public class PipelineList
   {
-    private static readonly HttpClient httpClient;
+    private static HttpClient httpClient;
 
     [JsonPropertyName(name: "factorylist")]
     public List<PipelineInfo> FactoryList { get; set; }
@@ -23,9 +23,21 @@ namespace IrisGathererADF.Models.Config
       FactoryList = new List<PipelineInfo>();
     }
 
-    public static async Task<PipelineList> Initialize(JobParams jobParams, CancellationToken cancellationToken)
+    public static async Task<PipelineList> Initialize(JobParams jobParams,
+                                                      CancellationToken cancellationToken,
+                                                      HttpMessageHandler handler = null)
     {
       PipelineList list = null;
+
+      if (handler is not null)
+      {
+        httpClient = new HttpClient(handler);
+      }
+
+      if (jobParams is null)
+      {
+        throw new ArgumentNullException("Job Parameters is null");
+      }
 
       switch(jobParams.ListLocation)
       {
