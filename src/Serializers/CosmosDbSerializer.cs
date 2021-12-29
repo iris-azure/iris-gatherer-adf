@@ -17,12 +17,18 @@ namespace IrisGathererADF.Serializers
     private CosmosDatabase _db;
     private CosmosContainer _container;
 
-    public CosmosDbSerializer(ILogger<CosmosDbSerializer> logger, Serializer config)
+    public CosmosDbSerializer(ILogger<CosmosDbSerializer> logger,
+                              Serializer config,
+                              CosmosClient client = null)
     {
       _logger = logger;
       _config = config;
 
-      _client = new CosmosClient(_config.ConnectionString);
+      if (client is null)
+        _client = new CosmosClient(_config.ConnectionString);
+      else
+        _client = client;
+        
       _db = null;
       _container = null;
     }
