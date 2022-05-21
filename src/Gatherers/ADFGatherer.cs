@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Identity;
 using IrisGathererADF.Models;
 using IrisGathererADF.Models.Config;
 using IrisGathererADF.Serializers;
 using Microsoft.Azure.Management.DataFactory;
 using Microsoft.Azure.Management.DataFactory.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.Rest;
 
 namespace IrisGathererADF.Gatherers
 {
@@ -17,19 +15,19 @@ namespace IrisGathererADF.Gatherers
   {
     private readonly ILogger<ADFGatherer> _logger;
     private readonly ISerializer _serializer;
-    private readonly DefaultAzureCredential _defCreds;
+    private readonly IDataFactoryManagementClient _client;
 
     private readonly JobParams _jobParams;
 
     public ADFGatherer(ILogger<ADFGatherer> logger,
                        ISerializer serializer,
-                       DefaultAzureCredential defCreds,
-                       JobParams jobParams)
+                       JobParams jobParams,
+                       IDataFactoryManagementClient client)
     {
       _logger = logger;
-      _defCreds = defCreds;
       _serializer = serializer;
       _jobParams = jobParams;
+      _client = client;
     }
 
     public async Task Gather(PipelineList pipelineList,
@@ -63,19 +61,10 @@ namespace IrisGathererADF.Gatherers
     private async Task GatherForAFactory(PipelineInfo pipelineInfo,
                                          CancellationToken cancellationToken)
     {
-      // Initialize ADF client
-      string token = _defCreds.GetToken(
-        new Azure.Core.TokenRequestContext(
-          new string[]{"https://management.azure.com/"})).Token;
-          
-      ServiceClientCredentials cred = new TokenCredentials(token);
-      DataFactoryManagementClient client = new DataFactoryManagementClient(cred)
-      {
-        SubscriptionId = pipelineInfo.SubscriptionId
-      };
+      _client.SubscriptionId = pipelineInfo.SubscriptionId;
       
       _logger.LogInformation($"GatherForAFactory: Gathering Data factory details for {pipelineInfo.Name} in {pipelineInfo.ResourceGroup}");
-      Factory factory = await client.Factories.GetAsync(pipelineInfo.ResourceGroup,
+      Factory factory = await _client.Factories.GetAsync(pipelineInfo.ResourceGroup,
                                                         pipelineInfo.Name,
                                                         null,
                                                         cancellationToken);
@@ -91,7 +80,7 @@ namespace IrisGathererADF.Gatherers
       RunStatus pipelineStatus;
 
       _logger.LogInformation($"GatherForAFactory: Listing pipelines for {pipelineInfo.Name} in {pipelineInfo.ResourceGroup}");
-      var pipelines = await client.Pipelines.ListByFactoryAsync(pipelineInfo.ResourceGroup, 
+      var pipelines = await _client.Pipelines.ListByFactoryAsync(pipelineInfo.ResourceGroup, 
                                                                 pipelineInfo.Name, 
                                                                 cancellationToken);
       foreach(PipelineResource pipeline_i in pipelines)
@@ -103,7 +92,7 @@ namespace IrisGathererADF.Gatherers
         pipeline.Folder = (pipeline_i.Folder == null ? string.Empty : pipeline_i.Folder.Name);
         pipeline.Description = pipeline_i.Description;
 
-        var pipelineruns = await client.PipelineRuns.QueryByFactoryAsync(
+        var pipelineruns = await _client.PipelineRuns.QueryByFactoryAsync(
                                     pipelineInfo.ResourceGroup, 
                                     pipelineInfo.Name, 
                                     new RunFilterParameters(

@@ -8,6 +8,8 @@ using IrisGathererADF.Gatherers;
 using IrisGathererADF.Models.Config;
 using IrisGathererADF.Serializers;
 using Azure.Identity;
+using Microsoft.Azure.Management.DataFactory;
+using Microsoft.Rest;
 
 namespace IrisGathererADF
 {
@@ -36,20 +38,6 @@ namespace IrisGathererADF
             config.GetSection("JobParams").Bind(jobParams);
             config.GetSection("Serializer").Bind(serializer);
 
-            services.AddSingleton(jobParams);
-            services.AddSingleton(serializer);
-            services.AddTransient<IGatherer, ADFGatherer>();
-            services.AddHostedService<GathererJob>();
-
-            switch(serializer.Type)
-            {
-              case "cosmos":
-                services.AddTransient<ISerializer, CosmosDbSerializer>();
-                break;
-              default:
-                throw new ArgumentException("Invalid serializer specified.", "Serializer");
-            }
-
             DefaultAzureCredentialOptions credOpts = new DefaultAzureCredentialOptions
             {
               ExcludeAzureCliCredential = false,
@@ -64,6 +52,30 @@ namespace IrisGathererADF
 
             DefaultAzureCredential defCred = new DefaultAzureCredential(credOpts);
             services.AddSingleton(defCred);
+            services.AddSingleton(jobParams);
+            services.AddSingleton(serializer);
+            services.AddTransient<IGatherer, ADFGatherer>();
+            services.AddTransient<IDataFactoryManagementClient>((serviceProvider) => 
+            {
+              DefaultAzureCredential creds = serviceProvider.GetRequiredService<DefaultAzureCredential>();
+              string token = creds.GetToken(
+                new Azure.Core.TokenRequestContext(
+                  new string[]{"https://management.azure.com/"})).Token;
+              
+              DataFactoryManagementClient client = new DataFactoryManagementClient(new TokenCredentials(token));
+              return client;
+            });
+            services.AddHostedService<GathererJob>();
+
+            switch(serializer.Type)
+            {
+              case "cosmos":
+                services.AddTransient<ISerializer, CosmosDbSerializer>();
+                break;
+              default:
+                throw new ArgumentException("Invalid serializer specified.", "Serializer");
+            }
+
           });
   }
 }
