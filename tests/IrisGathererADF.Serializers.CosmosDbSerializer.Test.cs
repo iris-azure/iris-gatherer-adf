@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Cosmos;
+using Microsoft.Azure.Cosmos;
 using IrisGathererADF.Models;
 using IrisGathererADF.Models.Config;
 using IrisGathererADF.Serializers;
@@ -35,7 +35,7 @@ namespace IrisGatherer.Test
     {
       Mock<ItemResponse<DataFactory>> itemResponse = new Mock<ItemResponse<DataFactory>>();
 
-      Mock<CosmosContainer> container = new Mock<CosmosContainer>();
+      Mock<Container> container = new Mock<Container>();
       container.Setup<ItemResponse<DataFactory>>(x => x.UpsertItemAsync<DataFactory>(
                                               It.IsAny<DataFactory>(),
                                               It.IsAny<PartitionKey?>(),
@@ -45,7 +45,7 @@ namespace IrisGatherer.Test
       Mock<ContainerResponse> response = new Mock<ContainerResponse>();
       response.Setup(x => x.Container).Returns(container.Object);
       
-      Mock<CosmosDatabase> database = new Mock<CosmosDatabase>();
+      Mock<Database> database = new Mock<Database>();
       database.Setup<ContainerResponse>(x => x.CreateContainerIfNotExistsAsync( 
                                               It.IsAny<string>(),
                                               It.IsAny<string>(),
@@ -81,7 +81,7 @@ namespace IrisGatherer.Test
       ex = Record.Exception( () => 
             client.Verify<Task<DatabaseResponse>>(x => 
                     x.CreateDatabaseIfNotExistsAsync(config.DatabaseName, 
-                                                     null, null, CancellationToken.None), 
+                                                     (int?) null, null, CancellationToken.None), 
                                                      Times.Once));
       Assert.Null(ex);
 

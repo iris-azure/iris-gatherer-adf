@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Cosmos;
+using Microsoft.Azure.Cosmos;
 using IrisGathererADF.Models;
 using IrisGathererADF.Models.Config;
 using Microsoft.Extensions.Logging;
@@ -14,8 +14,8 @@ namespace IrisGathererADF.Serializers
     private readonly ILogger<CosmosDbSerializer> _logger;
     private readonly Serializer _config;
     private CosmosClient _client;
-    private CosmosDatabase _db;
-    private CosmosContainer _container;
+    private Database _db;
+    private Container _container;
 
     public CosmosDbSerializer(ILogger<CosmosDbSerializer> logger,
                               Serializer config,
