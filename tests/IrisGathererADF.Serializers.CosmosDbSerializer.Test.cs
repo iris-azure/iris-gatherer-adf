@@ -93,7 +93,7 @@ namespace IrisGatherer.Test
                                                      Times.Once));
       Assert.Null(ex);
 
-DataFactory adf = new DataFactory()
+      DataFactory adf = new DataFactory()
       {
         Id = "TestID|ID1|XXX",
         Environment = "prod",
