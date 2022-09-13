@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +14,7 @@ using Microsoft.Rest;
 
 namespace IrisGathererADF
 {
+  [ExcludeFromCodeCoverage]
   class Program
   {
     public static async Task Main(string[] args)
