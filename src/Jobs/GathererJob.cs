@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 using IrisGathererADF.Gatherers;
 using IrisGathererADF.Models.Config;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace IrisGathererADF.Jobs
 {
+  [ExcludeFromCodeCoverage]
   public class GathererJob : IHostedService, IDisposable
   {
     private readonly ILogger<GathererJob> _logger;
