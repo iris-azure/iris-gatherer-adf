@@ -62,7 +62,7 @@ namespace IrisGathererADF
               DefaultAzureCredential creds = serviceProvider.GetRequiredService<DefaultAzureCredential>();
               string token = creds.GetToken(
                 new Azure.Core.TokenRequestContext(
-                  new string[]{"https://management.azure.com/"})).Token;
+                  new string[]{"https://management.azure.com/.default"})).Token;
               
               DataFactoryManagementClient client = new DataFactoryManagementClient(new TokenCredentials(token));
               return client;

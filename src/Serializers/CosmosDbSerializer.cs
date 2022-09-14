@@ -3,9 +3,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Logging;
 using IrisGathererADF.Models;
 using IrisGathererADF.Models.Config;
-using Microsoft.Extensions.Logging;
 
 namespace IrisGathererADF.Serializers
 {
@@ -25,7 +25,16 @@ namespace IrisGathererADF.Serializers
       _config = config;
 
       if (client is null)
-        _client = new CosmosClient(_config.ConnectionString);
+        _client = new CosmosClient(
+          _config.ConnectionString,
+          new CosmosClientOptions 
+          { 
+            SerializerOptions = new CosmosSerializationOptions 
+            { 
+              PropertyNamingPolicy = CosmosPropertyNamingPolicy.Default 
+            }
+          }
+        );
       else
         _client = client;
         
@@ -35,10 +44,13 @@ namespace IrisGathererADF.Serializers
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-      _db = await _client.CreateDatabaseIfNotExistsAsync(id: _config.DatabaseName, cancellationToken: cancellationToken);
-      _container = await _db.CreateContainerIfNotExistsAsync(id: _config.Container,
-                                                             partitionKeyPath: "/env",
-                                                             cancellationToken: cancellationToken);
+      _db = await _client.CreateDatabaseIfNotExistsAsync(id: _config.DatabaseName, 
+                                                         cancellationToken: cancellationToken);
+      ContainerResponse response = 
+        await _db.CreateContainerIfNotExistsAsync(id: _config.Container,
+                                                  partitionKeyPath: "/env",
+                                                  cancellationToken: cancellationToken);
+      _container = response.Container;
     }
 
     public async Task SerializeAsync(DataFactory dataFactory, CancellationToken cancellationToken)
