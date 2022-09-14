@@ -33,7 +33,7 @@ jobs:
       with:
         files: tests/test-result.xml
     - name: Publish Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
 
   analyze:
     name: Analyze
