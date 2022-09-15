@@ -27,11 +27,18 @@ jobs:
       run: dotnet build --no-restore /p:ContinuousIntegrationBuild=true
     - name: Test
       run: dotnet test --no-build --logger:"junit;LogFilePath=test-result.xml" --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
+    - name: Upload Test Results
       if: always()
+      uses: actions/upload-artifact@v2
       with:
-        junit_files: tests/test-result.xml
+        name: Test Results
+        path: |
+          tests/test-result.xml
+    # - name: Publish Unit Test Results
+    #   uses: EnricoMi/publish-unit-test-result-action@v2
+    #   if: always()
+    #   with:
+    #     junit_files: tests/test-result.xml
     - name: Publish Codecov
       uses: codecov/codecov-action@v3
 
@@ -59,3 +66,13 @@ jobs:
       uses: github/codeql-action/autobuild@v1
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
+
+  event_file:
+    name: "Event File"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Event File
+        path: ${{ github.event_path }}
