@@ -105,7 +105,7 @@ docker run --env IRISAZ_GATHERER_Logging__LogLevel__Default=Information \
            --env IRISAZ_GATHERER_JobParams__ListLocation=storage \
            --env IRISAZ_GATHERER_JobParams__ListStorageURL="<URL of the pipeline list with SAS token>" \
            --env IRISAZ_GATHERER_JobParams__DaysToKeep=10 \
-           --env AZURE_CLIENT_ID=<Application ID of the APN> \
+           --env AZURE_CLIENT_ID=<Application ID of the SPN> \
            --env AZURE_TENANT_ID=<GUID of the AAD tenant> \
            --env AZURE_CLIENT_SECRET=<Secret of the SPN> \
            iris-azure/adf-gatherer:latest
