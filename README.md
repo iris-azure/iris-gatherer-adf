@@ -129,17 +129,17 @@ The future roadmap is given below:
 
 Support for following stores for storing run information:
 
-[ ] Postgre SQL
-[ ] MySQL
-[ ] MariaDb
-[ ] Mongo DB
-[ ] SQL Server
+- [ ] Postgre SQL
+- [ ] MySQL
+- [ ] MariaDb
+- [ ] Mongo DB
+- [ ] SQL Server
 
 Support for following stores for storing pipeline information:
 
-[x] Azure BLOB Storage
-[ ] Postgre SQL
-[ ] MySQL
-[ ] MariaDb
-[ ] Mongo DB
-[ ] SQL Server
+- [x] Azure BLOB Storage
+- [ ] Postgre SQL
+- [ ] MySQL
+- [ ] MariaDb
+- [ ] Mongo DB
+- [ ] SQL Server
